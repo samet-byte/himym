@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Episodes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .aspect-w-16 {
+            position: relative;
+            padding-bottom: 50%; /* Changed from 56.25% (16:9) to 75% (4:3) for a taller video */
+        }
+        .aspect-w-16 > * {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+    <div class="container mx-auto p-4 max-w-6xl">
+        <!-- <h1 class="text-4xl font-bold mb-8 text-center text-purple-400">Awesome Video Player</h1> -->
+        <div class="flex flex-col space-y-6">
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <div class="flex-1">
+                    <label for="seasonSelect" class="block text-sm font-medium text-purple-300 mb-1">Season</label>
+                    <select id="seasonSelect" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">Select a season</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="episodeSelect" class="block text-sm font-medium text-purple-300 mb-1">Episode</label>
+                    <select id="episodeSelect" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="">Select an episode</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <div id="videoContainer" class="aspect-w-16 aspect-h-9 bg-gray-800 rounded-lg overflow-hidden">
+                    <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen class="w-full h-full"></iframe>
+                </div>
+                <h2 id="episodeTitle" class="text-2xl font-semibold mt-4 text-center text-purple-300"></h2>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        let content = [];
+
+        const seasonSelect = document.getElementById('seasonSelect');
+        const episodeSelect = document.getElementById('episodeSelect');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const episodeTitle = document.getElementById('episodeTitle');
+
+        async function loadContent() {
+            try {
+                const response = await fetch('/himym/series/content.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                content = data.content;
+                populateSeasons();
+            } catch (e) {
+                console.error("Could not load the content:", e);
+                alert("Failed to load content. Please try again later.");
+            }
+        }
+
+        function populateSeasons() {
+            seasonSelect.innerHTML = '<option value="">Select a season</option>';
+            content.forEach((season, index) => {
+                const option = document.createElement('option');
+                option.value = season.season;
+                option.textContent = `Season ${season.season}`;
+                seasonSelect.appendChild(option);
+            });
+        }
+
+        function populateEpisodes(seasonIndex) {
+            episodeSelect.innerHTML = '<option value="">Select an episode</option>';
+            const episodes = content[seasonIndex].episodes;
+            episodes.forEach(episode => {
+                const option = document.createElement('option');
+                option.value = episode.episode;
+                option.textContent = `Episode ${episode.episode}: ${episode.title}`;
+                episodeSelect.appendChild(option);
+            });
+        }
+
+        function updateVideo(season, episode) {
+            const src = `https://static.puzzle-movies.com/series/video/how-i-met-your-mother/s${season}e${episode}/video_hd.mp4`;
+            videoPlayer.src = src;
+            const seasonData = content.find(s => s.season === parseInt(season));
+            const episodeData = seasonData.episodes.find(e => e.episode === parseInt(episode));
+            episodeTitle.textContent = episodeData.title;
+        }
+
+        seasonSelect.addEventListener('change', (e) => {
+            const selectedSeason = e.target.value;
+            if (selectedSeason) {
+                const seasonIndex = content.findIndex(s => s.season === parseInt(selectedSeason));
+                populateEpisodes(seasonIndex);
+            }
+        });
+
+        episodeSelect.addEventListener('change', (e) => {
+            const selectedEpisode = e.target.value;
+            if (selectedEpisode) {
+                updateVideo(seasonSelect.value, selectedEpisode);
+            }
+        });
+
+        // Load content when the page loads
+        loadContent();
+    </script>
+    </body>
+    </html>

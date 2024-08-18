@@ -14,6 +14,9 @@
                 opacity: 0.5;
             }
         }
+        a {
+            text-decoration: none;
+        }
         .animate-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
@@ -36,25 +39,28 @@
     <div class="container mx-auto p-4 max-w-6xl">
         <!-- <h1 class="text-4xl font-bold mb-8 text-center text-purple-400">Awesome Video Player</h1> -->
         <div class="flex flex-col space-y-6">
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <div class="flex-1">
-                    <label for="seasonSelect" class="block text-sm font-medium text-purple-300 mb-1">Season</label>
-                    <select id="seasonSelect" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <option value="">Select a season</option>
-                    </select>
-                </div>
-                <div class="flex-1">
-                    <label for="episodeSelect" class="block text-sm font-medium text-purple-300 mb-1">Episode</label>
-                    <select id="episodeSelect" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <option value="">Select an episode</option>
-                    </select>
-                </div>
+          <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <div class="flex-1">
+              <label for="seasonSelect" class="block text-sm font-medium text-purple-300 mb-1">Season</label>
+              <select id="seasonSelect" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="">Select a season</option>
+              </select>
             </div>
+            <div class="flex-1">
+              <label for="episodeSelect" class="block text-sm font-medium text-purple-300 mb-1">Episode</label>
+              <select id="episodeSelect" class="w-full bg-gray-800 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="">Select an episode</option>
+              </select>
+            </div>
+          </div>
+          <h2 id="episodeTitle" class="text-2xl font-semibold mt-4 text-center text-purple-300">HIMYM Episodes</h2>
+          <h2 class="text-2xl font-semibold mt-4 mb-6 text-center text-purple-300">
+            <a id="episodeWebsites" href="" target="_blank" class="">Enjoy!</a>
+          </h2>
             <div>
                 <div id="videoContainer" class="aspect-w-16 aspect-h-9 bg-gray-800 rounded-lg overflow-hidden">
                     <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen class="w-full h-full"></iframe>
                 </div>
-                <h2 id="episodeTitle" class="text-2xl font-semibold mt-4 text-center text-purple-300"></h2>
             </div>
         </div>
     </div>
@@ -177,7 +183,7 @@
               { "episode": 1, "title": "Definitions" },
               { "episode": 2, "title": "Double Date" },
               { "episode": 3, "title": "Robin 101" },
-              { "episode": 4, "title": "The Sexless Innkeeper" },
+              { "episode": 4, "title": "The Sexless Innkeeper", "website": "itwasthebestnightever.com", "href": "https://samet-byte.github.io/himym/itwasthebestnightever/" },
               { "episode": 5, "title": "Duel Citizenship" },
               { "episode": 6, "title": "Bagpipes" },
               { "episode": 7, "title": "The Rough Patch" },
@@ -367,6 +373,10 @@
             const seasonData = content.find(s => s.season === parseInt(season));
             const episodeData = seasonData.episodes.find(e => e.episode === parseInt(episode));
             episodeTitle.textContent = episodeData.title;
+            if(episodeData.website){ 
+              episodeWebsites.textContent = episodeData.website;
+              episodeWebsites.href = episodeData.href;
+            }
         }
 
         seasonSelect.addEventListener('change', (e) => {

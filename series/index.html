@@ -328,6 +328,7 @@
         const episodeSelect = document.getElementById('episodeSelect');
         const videoPlayer = document.getElementById('videoPlayer');
         const episodeTitle = document.getElementById('episodeTitle');
+        const episodeWebsites = document.getElementById('episodeWebsites');
 
         async function loadContent() {
             try {
@@ -340,6 +341,7 @@
                 content = data.content;
                 */
                 populateSeasons();
+                loadSavedSelections();  // Load saved season and episode from localStorage
             } catch (e) {
                 console.error("Could not load the content:", e);
                 alert("Failed to load content. Please try again later.");
@@ -373,13 +375,34 @@
             const seasonData = content.find(s => s.season === parseInt(season));
             const episodeData = seasonData.episodes.find(e => e.episode === parseInt(episode));
             episodeTitle.textContent = episodeData.title;
-            if(episodeData.website){ 
-              episodeWebsites.textContent = episodeData.website;
-              episodeWebsites.href = episodeData.href;
+            
+            if (episodeData.website) { 
+                episodeWebsites.textContent = episodeData.website;
+                episodeWebsites.href = episodeData.href;
+            } else {
+                episodeWebsites.textContent = "Enjoy!";
+                episodeWebsites.href = "";
             }
-            else{
-              episodeWebsites.textContent = "Enjoy!";
-              episodeWebsites.href = "";
+        }
+
+        function saveSelections(season, episode) {
+            localStorage.setItem('selectedSeason', season);
+            localStorage.setItem('selectedEpisode', episode);
+        }
+
+        function loadSavedSelections() {
+            const savedSeason = localStorage.getItem('selectedSeason');
+            const savedEpisode = localStorage.getItem('selectedEpisode');
+
+            if (savedSeason) {
+                seasonSelect.value = savedSeason;
+                const seasonIndex = content.findIndex(s => s.season === parseInt(savedSeason));
+                populateEpisodes(seasonIndex);
+                
+                if (savedEpisode) {
+                    episodeSelect.value = savedEpisode;
+                    updateVideo(savedSeason, savedEpisode);
+                }
             }
         }
 
@@ -388,13 +411,16 @@
             if (selectedSeason) {
                 const seasonIndex = content.findIndex(s => s.season === parseInt(selectedSeason));
                 populateEpisodes(seasonIndex);
+                saveSelections(selectedSeason, "");  // Save only the season, episode is reset
             }
         });
 
         episodeSelect.addEventListener('change', (e) => {
             const selectedEpisode = e.target.value;
             if (selectedEpisode) {
-                updateVideo(seasonSelect.value, selectedEpisode);
+                const selectedSeason = seasonSelect.value;
+                updateVideo(selectedSeason, selectedEpisode);
+                saveSelections(selectedSeason, selectedEpisode);  // Save both season and episode
             }
         });
 
